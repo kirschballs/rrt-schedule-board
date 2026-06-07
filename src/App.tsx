@@ -1,4 +1,11 @@
 import { Fragment, useEffect, useState } from "react";
+import type { CSSProperties, FormEvent, ReactNode } from "react";
+import {
+  DndContext,
+  useDraggable,
+  useDroppable,
+} from "@dnd-kit/core";
+import type { DragEndEvent } from "@dnd-kit/core";
 import "./App.css";
 
 type Job = {
@@ -30,6 +37,8 @@ type JobDraft = {
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
 const machines = ["Perf 1", "Perf 2", "Saw", "QC / Packing"];
+
+const CELL_SEPARATOR = "::";
 
 const initialJobs: Job[] = [
   {
@@ -95,6 +104,90 @@ const emptyJobDraft: JobDraft = {
 
 const STORAGE_KEY = "rrt-schedule-board-jobs";
 
+function makeCellId(machine: string, day: string) {
+  return `${machine}${CELL_SEPARATOR}${day}`;
+}
+
+function parseCellId(cellId: string) {
+  const [machine, day] = cellId.split(CELL_SEPARATOR);
+
+  if (!machine || !day) {
+    return null;
+  }
+
+  if (!machines.includes(machine) || !days.includes(day)) {
+    return null;
+  }
+
+  return { machine, day };
+}
+
+function DroppableScheduleCell({
+  machine,
+  day,
+  children,
+}: {
+  machine: string;
+  day: string;
+  children: ReactNode;
+}) {
+  const { isOver, setNodeRef } = useDroppable({
+    id: makeCellId(machine, day),
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`schedule-cell ${isOver ? "drag-over" : ""}`}
+    >
+      {children}
+    </div>
+  );
+}
+
+function DraggableJobCard({
+  job,
+  selected,
+  onSelect,
+}: {
+  job: Job;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } =
+    useDraggable({
+      id: job.id,
+    });
+
+  const style: CSSProperties = {
+    transform: transform
+      ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
+      : undefined,
+    zIndex: isDragging ? 50 : undefined,
+    opacity: isDragging ? 0.85 : 1,
+  };
+
+  return (
+    <article
+      ref={setNodeRef}
+      style={style}
+      className={`job-card ${selected ? "selected" : ""} ${
+        isDragging ? "dragging" : ""
+      }`}
+      onClick={onSelect}
+      {...listeners}
+      {...attributes}
+    >
+      <strong>{job.id}</strong>
+      <span>{job.item}</span>
+      <small>
+        {job.start}–{job.end} · Qty {job.qty}
+      </small>
+      {job.notes && <em>{job.notes}</em>}
+    </article>
+  );
+}
+
 function App() {
   const [jobs, setJobs] = useState<Job[]>(() => {
     const savedJobs = localStorage.getItem(STORAGE_KEY);
@@ -134,7 +227,30 @@ function App() {
     }));
   }
 
-  function addJob(event: React.FormEvent<HTMLFormElement>) {
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+
+    if (!over) {
+      return;
+    }
+
+    const targetCell = parseCellId(String(over.id));
+
+    if (!targetCell) {
+      return;
+    }
+
+    const jobId = String(active.id);
+
+    updateJob(jobId, {
+      machine: targetCell.machine,
+      day: targetCell.day,
+    });
+
+    setSelectedJobId(jobId);
+  }
+
+  function addJob(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const id = newJob.id.trim();
@@ -183,7 +299,7 @@ function App() {
       <header className="app-header">
         <div>
           <h1>RRT Schedule Board Prototype</h1>
-          <p>Static fake data first. Drag/drop goblinry later.</p>
+          <p>Drag jobs between machine/day cells.</p>
         </div>
 
         <button className="reset-button" onClick={resetSchedule}>
@@ -192,48 +308,46 @@ function App() {
       </header>
 
       <div className="layout">
-        <section className="board">
-          <div className="corner-cell">Machine</div>
+        <DndContext onDragEnd={handleDragEnd}>
+          <section className="board">
+            <div className="corner-cell">Machine</div>
 
-          {days.map((day) => (
-            <div key={day} className="day-header">
-              {day}
-            </div>
-          ))}
+            {days.map((day) => (
+              <div key={day} className="day-header">
+                {day}
+              </div>
+            ))}
 
-          {machines.map((machine) => (
-            <Fragment key={machine}>
-              <div className="machine-label">{machine}</div>
+            {machines.map((machine) => (
+              <Fragment key={machine}>
+                <div className="machine-label">{machine}</div>
 
-              {days.map((day) => {
-                const dayJobs = jobs.filter(
-                  (job) => job.machine === machine && job.day === day
-                );
+                {days.map((day) => {
+                  const dayJobs = jobs.filter(
+                    (job) => job.machine === machine && job.day === day
+                  );
 
-                return (
-                  <div key={`${machine}-${day}`} className="schedule-cell">
-                    {dayJobs.map((job) => (
-                      <article
-                        key={job.id}
-                        className={`job-card ${
-                          selectedJobId === job.id ? "selected" : ""
-                        }`}
-                        onClick={() => setSelectedJobId(job.id)}
-                      >
-                        <strong>{job.id}</strong>
-                        <span>{job.item}</span>
-                        <small>
-                          {job.start}–{job.end} · Qty {job.qty}
-                        </small>
-                        {job.notes && <em>{job.notes}</em>}
-                      </article>
-                    ))}
-                  </div>
-                );
-              })}
-            </Fragment>
-          ))}
-        </section>
+                  return (
+                    <DroppableScheduleCell
+                      key={`${machine}-${day}`}
+                      machine={machine}
+                      day={day}
+                    >
+                      {dayJobs.map((job) => (
+                        <DraggableJobCard
+                          key={job.id}
+                          job={job}
+                          selected={selectedJobId === job.id}
+                          onSelect={() => setSelectedJobId(job.id)}
+                        />
+                      ))}
+                    </DroppableScheduleCell>
+                  );
+                })}
+              </Fragment>
+            ))}
+          </section>
+        </DndContext>
 
         <aside className="side-panel">
           <section className="add-job-panel">

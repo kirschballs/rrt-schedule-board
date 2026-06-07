@@ -345,3 +345,18 @@ dd {
   position: static;
   top: auto;
 }
+
+.schedule-cell.drag-over {
+  background: #13251a;
+  outline: 2px dashed #22c55e;
+  outline-offset: -6px;
+}
+
+.job-card {
+  touch-action: none;
+  user-select: none;
+}
+
+.job-card.dragging {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
