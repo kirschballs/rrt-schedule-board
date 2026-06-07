@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import "./App.css";
 
 type Job = {
@@ -67,11 +67,30 @@ const initialJobs: Job[] = [
   },
 ];
 
+const STORAGE_KEY = "rrt-schedule-board-jobs";
+
 function App() {
-  const [jobs, setJobs] = useState<Job[]>(initialJobs);
+  const [jobs, setJobs] = useState<Job[]>(() => {
+    const savedJobs = localStorage.getItem(STORAGE_KEY);
+
+    if (!savedJobs) {
+      return initialJobs;
+    }
+
+    try {
+      return JSON.parse(savedJobs) as Job[];
+    } catch {
+      return initialJobs;
+    }
+  });
+
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
 
   const selectedJob = jobs.find((job) => job.id === selectedJobId) ?? null;
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(jobs));
+  }, [jobs]);
 
   function updateJob(jobId: string, updates: Partial<Job>) {
     setJobs((currentJobs) =>
@@ -81,6 +100,11 @@ function App() {
     );
   }
 
+  function resetSchedule() {
+    setJobs(initialJobs);
+    setSelectedJobId(null);
+  }
+
   return (
     <main className="app">
       <header className="app-header">
@@ -88,6 +112,10 @@ function App() {
           <h1>RRT Schedule Board Prototype</h1>
           <p>Static fake data first. Drag/drop goblinry later.</p>
         </div>
+
+        <button className="reset-button" onClick={resetSchedule}>
+          Reset Schedule
+        </button>
       </header>
 
       <div className="layout">

@@ -202,3 +202,16 @@ dd {
   border-color: #22c55e;
   background: #052e16;
 }
+
+.reset-button {
+  border: 1px solid #3f4654;
+  border-radius: 8px;
+  background: #20242d;
+  color: #f4f4f5;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+.reset-button:hover {
+  filter: brightness(1.2);
+}
