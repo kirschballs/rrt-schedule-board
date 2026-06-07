@@ -185,15 +185,60 @@ function App() {
                   {selectedJob.day}, {selectedJob.start}–{selectedJob.end}
                 </dd>
 
-                <dt>Quantity</dt>
-                <dd>{selectedJob.qty}</dd>
-
                 <dt>Due Date</dt>
                 <dd>{selectedJob.dueDate ?? "N/A"}</dd>
-
-                <dt>Notes</dt>
-                <dd>{selectedJob.notes ?? "None"}</dd>
               </dl>
+
+              <div className="edit-controls">
+                <h3>Edit Job</h3>
+
+                <label>
+                  Start Time
+                  <input
+                    type="time"
+                    value={selectedJob.start}
+                    onChange={(event) =>
+                      updateJob(selectedJob.id, { start: event.target.value })
+                    }
+                  />
+                </label>
+
+                <label>
+                  End Time
+                  <input
+                    type="time"
+                    value={selectedJob.end}
+                    onChange={(event) =>
+                      updateJob(selectedJob.id, { end: event.target.value })
+                    }
+                  />
+                </label>
+
+                <label>
+                  Quantity
+                  <input
+                    type="number"
+                    min="0"
+                    value={selectedJob.qty}
+                    onChange={(event) =>
+                      updateJob(selectedJob.id, {
+                        qty: Number(event.target.value),
+                      })
+                    }
+                  />
+                </label>
+
+                <label>
+                  Notes
+                  <textarea
+                    value={selectedJob.notes ?? ""}
+                    onChange={(event) =>
+                      updateJob(selectedJob.id, { notes: event.target.value })
+                    }
+                    rows={4}
+                  />
+                </label>
+              </div>
 
               <div className="move-controls">
                 <h3>Move Day</h3>
