@@ -97,3 +97,72 @@ body {
 .job-card em {
   font-style: normal;
 }
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(700px, 1fr) 320px;
+  gap: 18px;
+  align-items: start;
+}
+
+.job-card {
+  cursor: pointer;
+}
+
+.job-card:hover {
+  filter: brightness(1.15);
+}
+
+.job-card.selected {
+  outline: 2px solid #86efac;
+}
+
+.details-panel {
+  min-height: 300px;
+  padding: 18px;
+  border: 1px solid #2f333d;
+  border-radius: 12px;
+  background: #181b22;
+  position: sticky;
+  top: 24px;
+}
+
+.details-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.details-header h2,
+.empty-detail h2 {
+  margin: 0;
+}
+
+.details-header button {
+  border: 1px solid #3f4654;
+  border-radius: 8px;
+  background: #20242d;
+  color: #f4f4f5;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+dl {
+  margin: 18px 0 0;
+}
+
+dt {
+  margin-top: 14px;
+  color: #a1a1aa;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+dd {
+  margin: 4px 0 0;
+}
+
+.empty-detail p {
+  color: #a1a1aa;
+}

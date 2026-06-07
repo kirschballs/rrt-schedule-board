@@ -1,3 +1,4 @@
+import { Fragment, useState } from "react";
 import "./App.css";
 
 type Job = {
@@ -8,6 +9,8 @@ type Job = {
   end: string;
   item: string;
   qty: number;
+  customer?: string;
+  dueDate?: string;
   notes?: string;
 };
 
@@ -24,6 +27,8 @@ const jobs: Job[] = [
     end: "11:00",
     item: '24" HDPE Perf Pipe',
     qty: 6,
+    customer: "Example Customer A",
+    dueDate: "2026-06-12",
     notes: "Pattern C, 4 rows, 1/2 stagger",
   },
   {
@@ -34,6 +39,8 @@ const jobs: Job[] = [
     end: "13:00",
     item: '18" HDPE Perf Pipe',
     qty: 10,
+    customer: "Example Customer B",
+    dueDate: "2026-06-13",
     notes: "Rush / confirm hole size",
   },
   {
@@ -42,8 +49,10 @@ const jobs: Job[] = [
     day: "Wednesday",
     start: "07:30",
     end: "10:00",
-    item: 'PVC Cut Lengths',
+    item: "PVC Cut Lengths",
     qty: 32,
+    customer: "Example Customer C",
+    dueDate: "2026-06-14",
   },
   {
     id: "MO123459",
@@ -53,57 +62,108 @@ const jobs: Job[] = [
     end: "15:00",
     item: "Final QC / Wrap",
     qty: 1,
+    customer: "Internal",
+    dueDate: "2026-06-14",
   },
 ];
 
 function App() {
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+
   return (
     <main className="app">
       <header className="app-header">
         <div>
           <h1>RRT Schedule Board Prototype</h1>
-          <p>Static fake data first. Drag/drop later.</p>
+          <p>Static fake data first. Drag/drop goblinry later.</p>
         </div>
       </header>
 
-      <section className="board">
-        <div className="corner-cell">Machine</div>
+      <div className="layout">
+        <section className="board">
+          <div className="corner-cell">Machine</div>
 
-        {days.map((day) => (
-          <div key={day} className="day-header">
-            {day}
-          </div>
-        ))}
-
-        {machines.map((machine) => (
-          <>
-            <div key={`${machine}-label`} className="machine-label">
-              {machine}
+          {days.map((day) => (
+            <div key={day} className="day-header">
+              {day}
             </div>
+          ))}
 
-            {days.map((day) => {
-              const dayJobs = jobs.filter(
-                (job) => job.machine === machine && job.day === day
-              );
+          {machines.map((machine) => (
+            <Fragment key={machine}>
+              <div className="machine-label">{machine}</div>
 
-              return (
-                <div key={`${machine}-${day}`} className="schedule-cell">
-                  {dayJobs.map((job) => (
-                    <article key={job.id} className="job-card">
-                      <strong>{job.id}</strong>
-                      <span>{job.item}</span>
-                      <small>
-                        {job.start}–{job.end} · Qty {job.qty}
-                      </small>
-                      {job.notes && <em>{job.notes}</em>}
-                    </article>
-                  ))}
-                </div>
-              );
-            })}
-          </>
-        ))}
-      </section>
+              {days.map((day) => {
+                const dayJobs = jobs.filter(
+                  (job) => job.machine === machine && job.day === day
+                );
+
+                return (
+                  <div key={`${machine}-${day}`} className="schedule-cell">
+                    {dayJobs.map((job) => (
+                      <article
+                        key={job.id}
+                        className={`job-card ${
+                          selectedJob?.id === job.id ? "selected" : ""
+                        }`}
+                        onClick={() => setSelectedJob(job)}
+                      >
+                        <strong>{job.id}</strong>
+                        <span>{job.item}</span>
+                        <small>
+                          {job.start}–{job.end} · Qty {job.qty}
+                        </small>
+                        {job.notes && <em>{job.notes}</em>}
+                      </article>
+                    ))}
+                  </div>
+                );
+              })}
+            </Fragment>
+          ))}
+        </section>
+
+        <aside className="details-panel">
+          {selectedJob ? (
+            <>
+              <div className="details-header">
+                <h2>{selectedJob.id}</h2>
+                <button onClick={() => setSelectedJob(null)}>×</button>
+              </div>
+
+              <dl>
+                <dt>Item</dt>
+                <dd>{selectedJob.item}</dd>
+
+                <dt>Customer</dt>
+                <dd>{selectedJob.customer ?? "N/A"}</dd>
+
+                <dt>Machine</dt>
+                <dd>{selectedJob.machine}</dd>
+
+                <dt>Scheduled</dt>
+                <dd>
+                  {selectedJob.day}, {selectedJob.start}–{selectedJob.end}
+                </dd>
+
+                <dt>Quantity</dt>
+                <dd>{selectedJob.qty}</dd>
+
+                <dt>Due Date</dt>
+                <dd>{selectedJob.dueDate ?? "N/A"}</dd>
+
+                <dt>Notes</dt>
+                <dd>{selectedJob.notes ?? "None"}</dd>
+              </dl>
+            </>
+          ) : (
+            <div className="empty-detail">
+              <h2>No MO selected</h2>
+              <p>Click a job block to view details.</p>
+            </div>
+          )}
+        </aside>
+      </div>
     </main>
   );
 }
