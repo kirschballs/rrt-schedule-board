@@ -267,3 +267,81 @@ dd {
 .edit-controls textarea {
   resize: vertical;
 }
+
+.side-panel {
+  position: sticky;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.add-job-panel {
+  padding: 18px;
+  border: 1px solid #2f333d;
+  border-radius: 12px;
+  background: #181b22;
+}
+
+.add-job-panel h2 {
+  margin: 0 0 14px;
+}
+
+.add-job-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.add-job-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #a1a1aa;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.add-job-form input,
+.add-job-form select,
+.add-job-form textarea {
+  width: 100%;
+  border: 1px solid #3f4654;
+  border-radius: 8px;
+  background: #101218;
+  color: #f4f4f5;
+  padding: 8px 10px;
+  font: inherit;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.add-job-form textarea {
+  resize: vertical;
+}
+
+.two-col-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.add-button {
+  border: 1px solid #22c55e;
+  border-radius: 8px;
+  background: #052e16;
+  color: #f4f4f5;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.add-button:hover {
+  filter: brightness(1.2);
+}
+
+.side-panel .details-panel {
+  position: static;
+  top: auto;
+}
