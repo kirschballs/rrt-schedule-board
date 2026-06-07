@@ -18,7 +18,7 @@ const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
 const machines = ["Perf 1", "Perf 2", "Saw", "QC / Packing"];
 
-const jobs: Job[] = [
+const initialJobs: Job[] = [
   {
     id: "MO123456",
     machine: "Perf 1",
@@ -68,7 +68,18 @@ const jobs: Job[] = [
 ];
 
 function App() {
-  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [jobs, setJobs] = useState<Job[]>(initialJobs);
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+
+  const selectedJob = jobs.find((job) => job.id === selectedJobId) ?? null;
+
+  function updateJob(jobId: string, updates: Partial<Job>) {
+    setJobs((currentJobs) =>
+      currentJobs.map((job) =>
+        job.id === jobId ? { ...job, ...updates } : job
+      )
+    );
+  }
 
   return (
     <main className="app">
@@ -104,9 +115,9 @@ function App() {
                       <article
                         key={job.id}
                         className={`job-card ${
-                          selectedJob?.id === job.id ? "selected" : ""
+                          selectedJobId === job.id ? "selected" : ""
                         }`}
-                        onClick={() => setSelectedJob(job)}
+                        onClick={() => setSelectedJobId(job.id)}
                       >
                         <strong>{job.id}</strong>
                         <span>{job.item}</span>
@@ -128,7 +139,7 @@ function App() {
             <>
               <div className="details-header">
                 <h2>{selectedJob.id}</h2>
-                <button onClick={() => setSelectedJob(null)}>×</button>
+                <button onClick={() => setSelectedJobId(null)}>×</button>
               </div>
 
               <dl>
@@ -155,6 +166,36 @@ function App() {
                 <dt>Notes</dt>
                 <dd>{selectedJob.notes ?? "None"}</dd>
               </dl>
+
+              <div className="move-controls">
+                <h3>Move Day</h3>
+                <div className="button-grid">
+                  {days.map((day) => (
+                    <button
+                      key={day}
+                      className={selectedJob.day === day ? "active" : ""}
+                      onClick={() => updateJob(selectedJob.id, { day })}
+                    >
+                      {day}
+                    </button>
+                  ))}
+                </div>
+
+                <h3>Move Machine</h3>
+                <div className="button-grid">
+                  {machines.map((machine) => (
+                    <button
+                      key={machine}
+                      className={
+                        selectedJob.machine === machine ? "active" : ""
+                      }
+                      onClick={() => updateJob(selectedJob.id, { machine })}
+                    >
+                      {machine}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </>
           ) : (
             <div className="empty-detail">

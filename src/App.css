@@ -166,3 +166,39 @@ dd {
 .empty-detail p {
   color: #a1a1aa;
 }
+
+.move-controls {
+  margin-top: 24px;
+  border-top: 1px solid #2f333d;
+  padding-top: 16px;
+}
+
+.move-controls h3 {
+  margin: 16px 0 8px;
+  font-size: 14px;
+}
+
+.button-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.button-grid button {
+  border: 1px solid #3f4654;
+  border-radius: 8px;
+  background: #20242d;
+  color: #f4f4f5;
+  padding: 8px 10px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.button-grid button:hover {
+  filter: brightness(1.2);
+}
+
+.button-grid button.active {
+  border-color: #22c55e;
+  background: #052e16;
+}
